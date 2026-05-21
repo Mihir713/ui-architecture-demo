@@ -1,99 +1,103 @@
-# UI Architecture Demo
+# UI Architecture Demo — Multi-Tenant Theming Engine
 
-> White-label component library • CSS custom property theming • Framework-agnostic
+> White-label component architecture • CSS custom property theming • JSON-driven customer environments
 
-16 reusable UI components driven entirely by CSS custom properties. Switch themes with a single attribute — every component restyles in one paint cycle. Zero framework overhead, zero runtime for styling.
+16 reusable UI components that restyle instantly per tenant — no code changes, just a JSON config file. Switch between customers in the environment dropdown; every component inherits the new brand in one paint cycle.
+
+## How It Works
+
+```
+┌─ Customer Config ──────────────────────────────┐
+│  acme-logistics.json                            │
+│  ├─ companyName: "Acme Logistics"               │
+│  ├─ primaryColor: #ea580c                       │
+│  ├─ accentColor: #f97316                        │
+│  ├─ backgroundColor: #0a0806                    │
+│  ├─ borderRadius: 4                             │
+│  └─ theme: { bgBase, textPrimary, border, ... } │
+└─────────────────────────────────────────────────┘
+        │
+        ▼
+┌─ Config Loader (fetch → CSS vars) ─────────────┐
+│  root.style.setProperty('--accent', '#f97316')  │
+│  root.style.setProperty('--bg-base', '#0f0a06') │
+│  ...20+ tokens applied in one batch             │
+└─────────────────────────────────────────────────┘
+        │
+        ▼
+┌─ Component Layer (var() references) ───────────┐
+│  .btn-primary { background: var(--accent) }      │
+│  .card { background: var(--bg-elevated) }        │
+│  All 16 components update simultaneously         │
+└─────────────────────────────────────────────────┘
+```
+
+## Customer Environments
+
+| Environment | Accent | Background | Radius | Vibe |
+|-------------|--------|------------|--------|------|
+| **Default** (Corporate) | Indigo `#5e6ad2` | `#0f1011` | 6px | Professional blue |
+| **Acme Logistics** | Orange `#f97316` | `#0f0a06` | 4px | Utilitarian, grounded |
+| **Nordic Bank** | Blue `#3b82f6` | `#080b15` | 2px | Conservative, precise |
+| **Vertex Health** | Teal `#14b8a6` | `#080f0c` | 8px | Clean, approachable |
 
 ## Tech Stack
 
 | Layer | Technology | Role |
 |-------|-----------|------|
-| **TypeScript** | TypeScript 5.7, strict mode | Typed interaction layer (modals, tabs, toggles, keyboard nav) |
-| **CSS** | Custom Properties + Cascade | Complete theming engine — 3 themes, 16 components, all `var()` driven |
-| **HTML** | Semantic markup | Component showcase, accessible structure |
-| **Node.js** | v18+, http module, Vite | Production server (CSP headers, compression) + build pipeline |
-
-**Languages detected:** HTML (28KB), CSS (22KB), TypeScript (6KB), JavaScript (1.7KB)
+| **TypeScript** | 5.7, strict mode | Typed interaction layer + config loader |
+| **CSS** | Custom Properties + Cascade | Complete theming engine — all `var()` driven |
+| **HTML** | Semantic markup | 16-component showcase |
+| **JSON** | Per-tenant schema | Brand tokens, zero code changes per client |
+| **Node.js** | 18+, http module, Vite | Production server + build pipeline |
 
 ## Architecture
 
 ```
 ui-architecture-demo/
+├── customer-configs/          ← Multi-tenant brand configs
+│   ├── acme-logistics.json
+│   ├── nordic-bank.json
+│   └── vertex-health.json
 ├── src/
 │   └── scripts/
-│       └── main.ts          ← TypeScript source (typed, compiled by Vite)
-├── index.html                ← Single-page component showcase (68KB)
-├── server.js                 ← Node.js production server with CSP
-├── vite.config.ts            ← Vite bundler config
-├── tsconfig.json             ← TypeScript strict mode config
-├── package.json
-└── dist/                     ← Production build output
+│       ├── main.ts            ← TypeScript interaction layer
+│       └── config-loader.ts   ← Typed config fetcher + CSS var injector
+├── index.html                 ← 16-component showcase
+├── ARCHITECTURE.md            ← Design decisions deep-dive
+├── server.js                  ← Node.js production server
+├── vite.config.ts             ← Vite bundler config
+└── tsconfig.json              ← TypeScript strict mode
 ```
 
-### Theming Engine
-
-CSS custom properties define every visual value: colors, borders, shadows, radii, spacing. Changing `data-theme` on `<html>` cascades through all components via `var()` references — no JavaScript re-rendering, no class toggling per element.
-
-```
-[data-theme="corporate"] { --accent: #5e6ad2; --bg-base: #0f1011; ... }
-[data-theme="midnight"]  { --accent: #7850ff; --bg-base: #0e0e15; ... }
-[data-theme="sunset"]    { --accent: #f97316; --bg-base: #150b08; ... }
-```
-
-### Component Architecture
-
-- **Framework-agnostic:** Semantic HTML + atomic CSS classes → translates directly to React, Vue, or any component framework
-- **Theme-aware by default:** No per-component theme code — every component inherits via `var()`
-- **Decoupled patterns:** Modifier classes (`.btn-primary`, `.btn-lg`, `.card-header`) instead of prop drilling
-
-## Components
-
-| # | Component | Variants |
-|---|-----------|----------|
-| 1 | Buttons | Primary, secondary, ghost, danger, disabled · sm/md/lg · icon |
-| 2 | Cards | Project, analytics/stat, team list |
-| 3 | Forms | Text input, email, select, textarea, toggle · validation states |
-| 4 | Badges | Accent, success, warning, error, info · dot indicators |
-| 5 | Table | Sortable columns, progress bars, status badges |
-| 6 | Tabs | Animated active state, 4-panel content switching |
-| 7 | Modals | Confirm, info, form · backdrop blur, slide-up animation |
-| 8 | Stats & Metrics | Accent-colored values, trend indicators |
-| 9 | Toolbar | Action groups with dividers |
-| 10 | Empty State | Dashed border fallback with CTA |
-| 11 | Notifications | Success, info, error toast variants |
+See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full rationale on CSS custom properties vs. prop-based theming, how this scales to React, and the zero-code-change client onboarding flow.
 
 ## Quick Start
 
 ```bash
-# Install
 npm install
-
-# Development (Vite HMR)
-npm run dev
-
-# Production build
-npm run build
-
-# Serve (Node.js)
-npm run serve
-# → http://localhost:8082
+npm run dev      # Vite HMR dev server
+npm run build    # Production build → dist/
+npm run serve    # Node.js server → http://localhost:8082
 ```
 
-## Themes
-
-| Theme | Accent | Vibe |
-|-------|--------|------|
-| **Corporate** (default) | Indigo `#5e6ad2` | Dark, professional, blue |
-| **Midnight** | Purple `#7850ff` | Rich, deep, purple-toned |
-| **Sunset** | Orange `#f97316` | Warm, earthy, cozy |
-
-Switch via the top bar — instant restyle, zero flicker.
-
-## Deployment
+## Onboarding a New Client
 
 ```bash
-npm run build   # outputs to dist/
-node server.js  # serves dist/ with CSP headers
+cp customer-configs/acme-logistics.json customer-configs/new-brand.json
+# Edit colors, font, radius
+# Add <option value="new-brand"> in index.html
+npm run build && npm run serve
 ```
 
-Supports any static host (Netlify, Vercel, Cloudflare Pages, S3).
+Zero component changes. Zero pipeline changes. One JSON file.
+
+## Languages
+
+| Language | Purpose | Size |
+|----------|---------|------|
+| HTML | Component markup | 28KB |
+| CSS | Theming engine + components | 22KB |
+| TypeScript | Interaction logic + config loader | 8KB |
+| JavaScript | Node.js server | 1.7KB |
+| JSON | Customer brand configs | 1.4KB |
