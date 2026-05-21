@@ -1,0 +1,18 @@
+{
+  "companyName": "Nordic Bank",
+  "primaryColor": "#1e3a5f",
+  "accentColor": "#3b82f6",
+  "backgroundColor": "#060810",
+  "fontFamily": "'Inter', system-ui, sans-serif",
+  "borderRadius": 2,
+  "logoInitials": "NB",
+  "theme": {
+    "bgBase": "#080b15",
+    "bgElevated": "#0e1424",
+    "textPrimary": "#e8edf5",
+    "textSecondary": "#b8c4d8",
+    "textTertiary": "#6a7a94",
+    "borderColor": "rgba(59,130,246,0.12)",
+    "successColor": "#059669"
+  }
+}
