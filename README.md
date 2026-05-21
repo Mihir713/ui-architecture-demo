@@ -1,223 +1,99 @@
 # UI Architecture Demo
 
-> A white-label-ready component library and theming engine — 16 reusable UI components driven entirely by CSS custom properties. Switch between three distinct themes instantly with zero JavaScript re-rendering.
+> White-label component library • CSS custom property theming • Framework-agnostic
 
-![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript)
-![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?style=flat-square&logo=vite)
-![Node](https://img.shields.io/badge/Node.js-%3E%3D18-339933?style=flat-square&logo=node.js)
-![CSS](https://img.shields.io/badge/CSS-Custom%20Properties-1572B6?style=flat-square&logo=css3)
-![Themes](https://img.shields.io/badge/themes-3-9742FF?style=flat-square)
-![Components](https://img.shields.io/badge/components-16-3B82F6?style=flat-square)
-![License](https://img.shields.io/badge/license-MIT-9742FF?style=flat-square)
-
----
+16 reusable UI components driven entirely by CSS custom properties. Switch themes with a single attribute — every component restyles in one paint cycle. Zero framework overhead, zero runtime for styling.
 
 ## Tech Stack
 
-| Technology | Use |
-|-----------|-----|
-| **TypeScript 5.7** | Strict-mode type safety for all interaction logic (theme switching, tabs, modal, toasts) |
-| **Vite 6** | Build pipeline with HMR dev server, TypeScript compilation, CSS bundling, and tree-shaking |
-| **Node.js 18+** | Production HTTP server (`server.js`) with CSP headers and fallback routing |
-| **CSS Custom Properties** | Full theming engine — all visual tokens are `var()` references, enabling runtime theme switching without JavaScript |
-| **HTML5** | Semantic markup with ARIA-compatible component structure |
+| Layer | Technology | Role |
+|-------|-----------|------|
+| **TypeScript** | TypeScript 5.7, strict mode | Typed interaction layer (modals, tabs, toggles, keyboard nav) |
+| **CSS** | Custom Properties + Cascade | Complete theming engine — 3 themes, 16 components, all `var()` driven |
+| **HTML** | Semantic markup | Component showcase, accessible structure |
+| **Node.js** | v18+, http module, Vite | Production server (CSP headers, compression) + build pipeline |
 
-## Overview
-
-This project demonstrates a **UI architecture pattern** for building white-label applications — products that need to be deployed across multiple customer environments, each with its own branding, while sharing 100% of the component logic.
-
-The entire visual layer is controlled through CSS custom properties (design tokens). Changing a single attribute on `<html>` swaps every color, shadow, radius, font, and spacing across all 16 components simultaneously. No React context providers. No styled-components. No runtime JavaScript for theming.
-
-## Why This Architecture Matters
-
-Most UI frameworks handle theming at the component level — each button, card, and modal needs explicit theme awareness. This approach scales poorly when you have 5, 10, or 50 customers, each with unique brand requirements.
-
-This demo uses the opposite approach: **theme at the token level**. Components never know about themes. They only reference `var(--color-accent)`, `var(--radius-md)`, etc. New themes are just a new set of token values — no component changes required.
+**Languages detected:** HTML (28KB), CSS (22KB), TypeScript (6KB), JavaScript (1.7KB)
 
 ## Architecture
 
 ```
-├── index.html                  # Entry point — loads Vite bundle
+ui-architecture-demo/
 ├── src/
-│   ├── scripts/
-│   │   └── main.ts              # TypeScript — theme switching, tabs, modal, toast
-│   └── styles/
-│       ├── theme.css             # Design tokens as CSS custom properties × 3 themes
-│       ├── base.css              # Reset, typography, layout grid, sidebar, header
-│       └── components.css        # 16 component styles — all use var() references
-├── server.js                    # Node.js production server with CSP headers
-├── package.json                 # Vite + TypeScript dev dependencies
-├── tsconfig.json                # TypeScript strict config
-├── vite.config.ts               # Vite build configuration
-├── README.md
-└── .gitignore
+│   └── scripts/
+│       └── main.ts          ← TypeScript source (typed, compiled by Vite)
+├── index.html                ← Single-page component showcase (68KB)
+├── server.js                 ← Node.js production server with CSP
+├── vite.config.ts            ← Vite bundler config
+├── tsconfig.json             ← TypeScript strict mode config
+├── package.json
+└── dist/                     ← Production build output
 ```
 
-### Theme Engine (`css/themes/theme.css`)
+### Theming Engine
 
-Every visual property is defined as a CSS custom property under `:root`:
+CSS custom properties define every visual value: colors, borders, shadows, radii, spacing. Changing `data-theme` on `<html>` cascades through all components via `var()` references — no JavaScript re-rendering, no class toggling per element.
 
-```css
-:root, [data-theme="corporate"] {
-  --color-accent:          #3b82f6;
-  --color-bg:              #f8fafc;
-  --color-surface:         #ffffff;
-  --color-text-primary:    #0f172a;
-  --color-sidebar-bg:      #1e293b;
-  --radius-md:             8px;
-  --shadow-lg:             0 10px 15px -3px rgba(0,0,0,0.08);
-  /* ... 50+ tokens total */
-}
+```
+[data-theme="corporate"] { --accent: #5e6ad2; --bg-base: #0f1011; ... }
+[data-theme="midnight"]  { --accent: #7850ff; --bg-base: #0e0e15; ... }
+[data-theme="sunset"]    { --accent: #f97316; --bg-base: #150b08; ... }
 ```
 
-New themes override only the values that differ:
+### Component Architecture
 
-```css
-[data-theme="midnight"] {
-  --color-accent:          #7c3aed;    /* purple instead of blue */
-  --color-bg:              #0c0e19;    /* dark background */
-  --color-sidebar-bg:      #0f1120;
-  /* everything else inherits from :root */
-}
-```
+- **Framework-agnostic:** Semantic HTML + atomic CSS classes → translates directly to React, Vue, or any component framework
+- **Theme-aware by default:** No per-component theme code — every component inherits via `var()`
+- **Decoupled patterns:** Modifier classes (`.btn-primary`, `.btn-lg`, `.card-header`) instead of prop drilling
 
-Switching themes is a one-line operation:
-```js
-document.documentElement.setAttribute('data-theme', 'midnight');
-```
+## Components
 
-### Component Layer (`css/components/components.css`)
-
-Components never reference specific colors or values. Every style declaration uses `var()`:
-
-```css
-.btn-primary {
-  background: var(--color-accent);
-  color: var(--color-accent-text);
-  border-color: var(--color-accent);
-  border-radius: var(--radius-md);
-}
-
-.card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-}
-```
-
-This means **every component is theme-agnostic by default**. Adding a new theme requires zero component changes.
-
-## Component Inventory
-
-| Component | Variants | CSS Classes |
-|-----------|----------|-------------|
-| **Button** | 4 variants × 3 sizes + icon | `.btn`, `.btn-primary/secondary/ghost/danger`, `.btn-sm/lg/icon` |
-| **Card** | Header, body, footer sections | `.card`, `.card-header`, `.card-title`, `.card-subtitle`, `.card-body`, `.card-footer` |
-| **Badge** | 5 styles (accent, success, warning, danger, info) | `.badge`, `.badge-{accent,success,warning,danger,info}` |
-| **Input** | Text, email, textarea, select + error state | `.input`, `.input-group`, `.input-label`, `.input-hint`, `.input-error` |
-| **Toggle** | Switch with animated thumb | `.toggle`, `.toggle-track`, `.toggle-thumb` |
-| **Table** | Full-width with hover states | `.table-wrap`, `table`, `th`, `td` |
-| **Tabs** | Active indicator with content panels | `.tabs`, `.tab-btn`, `.tab-content` |
-| **Modal** | Overlay with backdrop + transitions | `.modal-overlay`, `.modal`, `.modal-actions` |
-| **Toolbar** | Action bar with dividers | `.toolbar`, `.toolbar-divider` |
-| **Avatar** | 3 sizes with initials | `.avatar`, `.avatar-sm/lg` |
-| **Progress Bar** | Animated fill | `.progress`, `.progress-bar` |
-| **Stat Card** | Metric display | `.stat-card`, `.stat-value`, `.stat-label` |
-| **Empty State** | Fallback UI | `.empty-state` |
-| **Toast** | Notification (auto-dismiss) | `.toast`, `.toast-container` |
-| **Sidebar** | Navigation shell | `.sidebar`, `.sidebar-item`, `.sidebar-section` |
-| **Header** | Top bar with breadcrumb + actions | `.header`, `.header-left/right` |
+| # | Component | Variants |
+|---|-----------|----------|
+| 1 | Buttons | Primary, secondary, ghost, danger, disabled · sm/md/lg · icon |
+| 2 | Cards | Project, analytics/stat, team list |
+| 3 | Forms | Text input, email, select, textarea, toggle · validation states |
+| 4 | Badges | Accent, success, warning, error, info · dot indicators |
+| 5 | Table | Sortable columns, progress bars, status badges |
+| 6 | Tabs | Animated active state, 4-panel content switching |
+| 7 | Modals | Confirm, info, form · backdrop blur, slide-up animation |
+| 8 | Stats & Metrics | Accent-colored values, trend indicators |
+| 9 | Toolbar | Action groups with dividers |
+| 10 | Empty State | Dashed border fallback with CTA |
+| 11 | Notifications | Success, info, error toast variants |
 
 ## Quick Start
 
 ```bash
-git clone https://github.com/Mihir713/ui-architecture-demo.git
-cd ui-architecture-demo
-
-# Install dependencies
+# Install
 npm install
 
-# Development server (with HMR)
+# Development (Vite HMR)
 npm run dev
 
 # Production build
 npm run build
 
-# Preview production build
-npm run preview
-
-# Or serve with Node.js
+# Serve (Node.js)
 npm run serve
+# → http://localhost:8082
 ```
 
-Then open `http://localhost:8082` in your browser.
+## Themes
 
-## How to Extend
+| Theme | Accent | Vibe |
+|-------|--------|------|
+| **Corporate** (default) | Indigo `#5e6ad2` | Dark, professional, blue |
+| **Midnight** | Purple `#7850ff` | Rich, deep, purple-toned |
+| **Sunset** | Orange `#f97316` | Warm, earthy, cozy |
 
-### Add a New Theme
+Switch via the top bar — instant restyle, zero flicker.
 
-Add a block to `css/themes/theme.css`:
+## Deployment
 
-```css
-[data-theme="ocean"] {
-  --color-accent:          #0ea5e9;
-  --color-bg:              #ecfeff;
-  --color-surface:         #ffffff;
-  --color-sidebar-bg:      #0c4a6e;
-  --color-text-primary:    #0c4a6e;
-  /* override as many or as few tokens as needed */
-}
+```bash
+npm run build   # outputs to dist/
+node server.js  # serves dist/ with CSP headers
 ```
 
-That's it. All 16 components render with the new theme. No component code changes.
-
-### Add a New Component
-
-Create a new CSS file in `css/components/`:
-
-```css
-/* css/components/slider.css */
-.slider {
-  background: var(--color-border);
-  border-radius: var(--radius-full);
-}
-.slider-thumb {
-  background: var(--color-accent);
-  box-shadow: var(--shadow-md);
-}
-```
-
-Reference `var()` tokens. It's theme-aware immediately.
-
-## Deployment to Customer Environments
-
-This architecture maps to a deployment workflow for white-label SaaS:
-
-1. **Build the component library** — shared across all customers
-2. **Define a theme per customer** — a CSS file with their token overrides
-3. **Serve the customer's theme** — either bundled at build time or injected at runtime
-4. **No forking** — every customer runs the same component code
-
-For React/Vue integration, wrap the token system in a provider:
-
-```jsx
-// React example — 3 lines of integration
-function ThemeProvider({ theme, children }) {
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-  return children;
-}
-```
-
-## Design Decisions
-
-- **CSS custom properties over preprocessor variables** — dynamic, runtime-switchable, inherited through the DOM
-- **No CSS-in-JS** — zero runtime cost for theming, works with any framework or no framework
-- **Component classes over utility classes** — semantic class names (`.btn-primary`) over atomic utilities (`.bg-blue-500`) because this is a component library, not a design system playground
-- **Dark mode = just another theme** — the Midnight theme is a simple token swap, not a `prefers-color-scheme` media query hack
-- **Framework-agnostic** — works with React, Vue, Angular, Svelte, or vanilla HTML. The JS for modals/tabs/toasts is ~50 lines total and easily ported.
-
-## License
-
-MIT
+Supports any static host (Netlify, Vercel, Cloudflare Pages, S3).
