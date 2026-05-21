@@ -383,6 +383,55 @@
       background: var(--success);
     }
     
+    .customer-selector {
+      position: relative;
+    }
+    
+    .customer-selector::after {
+      content: '';
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 8px;
+      height: 8px;
+      border-right: 1.5px solid var(--text-tertiary);
+      border-bottom: 1.5px solid var(--text-tertiary);
+      transform: translateY(-70%) rotate(45deg);
+      pointer-events: none;
+    }
+    
+    .customer-select {
+      font-family: var(--font-sans);
+      font-feature-settings: 'cv01', 'ss03';
+      font-size: 12px;
+      font-weight: 510;
+      padding: 5px 28px 5px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      color: var(--text-primary);
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      transition: all var(--dur-fast) var(--ease-out);
+      min-width: 160px;
+    }
+    
+    .customer-select:hover {
+      border-color: var(--border-strong);
+    }
+    
+    .customer-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+    
+    .customer-select option {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+    
     .topbar-avatar {
       width: 28px;
       height: 28px;
@@ -1413,10 +1462,13 @@
         </div>
       </div>
       <div class="topbar-right">
-        <div class="theme-switcher">
-          <button class="theme-btn active" data-theme-btn="corporate">Corporate</button>
-          <button class="theme-btn" data-theme-btn="midnight">Midnight</button>
-          <button class="theme-btn" data-theme-btn="sunset">Sunset</button>
+        <div class="customer-selector">
+          <select class="customer-select" id="customer-select">
+            <option value="">Default (Corporate)</option>
+            <option value="acme-logistics">Acme Logistics</option>
+            <option value="nordic-bank">Nordic Bank</option>
+            <option value="vertex-health">Vertex Health</option>
+          </select>
         </div>
         <div class="topbar-status">All systems</div>
         <div class="topbar-avatar">MG</div>
@@ -1426,7 +1478,7 @@
     <!-- ─── HERO INTRO ─── -->
     <section class="section" id="intro">
       <div class="hero-intro">
-        <div class="hero-badge">✦ Framework-Agnostic</div>
+        <div class="hero-badge">✦ Default Environment</div>
         <h1 class="hero-title">White-label component architecture</h1>
         <p class="hero-desc">
           A production-ready component library powered by CSS custom properties.
@@ -2012,13 +2064,55 @@
 </div>
 
 <script>
-  // ── Theme switcher ──
-  document.querySelectorAll('[data-theme-btn]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('[data-theme-btn]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.documentElement.setAttribute('data-theme', btn.dataset.themeBtn);
-    });
+  // ── Customer config loader ──
+  document.getElementById('customer-select')?.addEventListener('change', function() {
+    const key = this.value;
+    if (!key) {
+      // Reset to default: remove all inline CSS vars
+      document.documentElement.style.cssText = '';
+      document.documentElement.className = '';
+      document.querySelector('.hero-badge').textContent = '✦ Default Environment';
+      document.querySelector('.sidebar-logo .logo-icon').textContent = '◆';
+      document.querySelector('.topbar-breadcrumb span:last-child').textContent = 'UI Architecture Demo';
+      return;
+    }
+    fetch('/customer-configs/' + key + '.json')
+      .then(r => r.json())
+      .then(config => {
+        const root = document.documentElement;
+        const t = config.theme;
+        const vars = {
+          '--bg-deep': config.backgroundColor,
+          '--bg-base': t.bgBase,
+          '--bg-elevated': t.bgElevated,
+          '--bg-hover': t.bgElevated,
+          '--surface': 'rgba(255,255,255,0.02)',
+          '--surface-hover': 'rgba(255,255,255,0.04)',
+          '--text-primary': t.textPrimary,
+          '--text-secondary': t.textSecondary,
+          '--text-tertiary': t.textTertiary,
+          '--text-quaternary': 'rgba(255,255,255,0.35)',
+          '--accent': config.accentColor,
+          '--accent-hover': config.primaryColor,
+          '--accent-glow': config.accentColor + '33',
+          '--accent-muted': config.accentColor + '1A',
+          '--success': t.successColor,
+          '--success-bg': t.successColor + '1A',
+          '--warning': '#f59e0b',
+          '--error': '#ef4444',
+          '--info': '#3b82f6',
+          '--border': t.borderColor,
+          '--border-strong': t.borderColor,
+          '--r-md': config.borderRadius + 'px',
+          '--r-lg': Math.min(config.borderRadius + 2, 12) + 'px',
+          '--r-xl': Math.min(config.borderRadius + 4, 16) + 'px',
+        };
+        Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v));
+        document.querySelector('.hero-badge').textContent = '✦ ' + config.companyName;
+        document.querySelector('.sidebar-logo .logo-icon').textContent = config.logoInitials;
+        document.querySelector('.topbar-breadcrumb span:last-child').textContent = config.companyName;
+      })
+      .catch(err => console.error('Config load failed:', err));
   });
 
   // ── Sidebar active link ──
