@@ -1293,6 +1293,75 @@
     }
     
     /* ═══════════════════════════════════════════════
+    /* ── Theming Pipeline ── */
+    .theming-pipeline {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 32px;
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+    }
+    
+    .pipeline-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 12px 20px;
+      border-radius: var(--r-lg);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      flex: 1;
+      max-width: 180px;
+    }
+    
+    .pipeline-icon { font-size: 24px; margin-bottom: 4px; }
+    .pipeline-label { font-size: 13px; font-weight: 590; color: var(--text-primary); }
+    .pipeline-desc { font-size: 11px; color: var(--text-tertiary); text-align: center; }
+    .pipeline-arrow { font-size: 20px; color: var(--accent); font-weight: 300; }
+    
+    .theme-sample { position: relative; }
+    
+    .theme-sample-badge {
+      position: absolute;
+      top: -6px;
+      right: 12px;
+      padding: 2px 8px;
+      font-size: 9px;
+      font-weight: 700;
+      border-radius: var(--r-full);
+      background: var(--accent-muted);
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .theme-sample-badge.test {
+      background: var(--warning-bg);
+      color: var(--warning);
+    }
+    
+    .theme-sample.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent), 0 0 24px var(--accent-glow);
+    }
+    
+    /* ── Smooth theme morphing ── */
+    html.theme-morphing *,
+    html.theme-morphing *::before,
+    html.theme-morphing *::after {
+      transition: background-color 400ms cubic-bezier(0.16, 1, 0.3, 1),
+                  color 400ms cubic-bezier(0.16, 1, 0.3, 1),
+                  border-color 400ms cubic-bezier(0.16, 1, 0.3, 1),
+                  box-shadow 400ms cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 400ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    
+    /* ═══════════════════════════════════════════════
        UTILITY / THEMING ENGINE SHOWCASE
        ═══════════════════════════════════════════════ */
     .theming-demo {
@@ -1482,7 +1551,7 @@
         <h1 class="hero-title">White-label component architecture</h1>
         <p class="hero-desc">
           A production-ready component library powered by CSS custom properties.
-          No framework dependencies. Zero runtime. Switch themes below — every component restyles instantly.
+          No framework dependencies. Zero runtime. Switch customers below — every component morphs smoothly.
         </p>
         <div class="hero-stats">
           <div class="hero-stat">
@@ -1490,8 +1559,8 @@
             <span class="hero-stat-label">Components</span>
           </div>
           <div class="hero-stat">
-            <span class="hero-stat-value">3</span>
-            <span class="hero-stat-label">Themes</span>
+            <span class="hero-stat-value">4</span>
+            <span class="hero-stat-label">Environments</span>
           </div>
           <div class="hero-stat">
             <span class="hero-stat-value">4</span>
@@ -1510,55 +1579,88 @@
       <div class="section-header">
         <div class="section-tag">✦ Architecture</div>
         <h2 class="section-title">Theming Engine</h2>
-        <p class="section-desc">CSS custom properties drive all visual output. Change <code>data-theme</code> on &lt;html&gt; — every component restyles in one paint cycle.</p>
+        <p class="section-desc">Every customer environment is a JSON file. Switch the dropdown above — this page loads the config, injects the tokens as CSS custom properties, and all 16 components restyle in one paint cycle.</p>
       </div>
+      
+      <div class="theming-pipeline">
+        <div class="pipeline-step">
+          <div class="pipeline-icon">📄</div>
+          <div class="pipeline-label">1. JSON Config</div>
+          <div class="pipeline-desc">Brand tokens per tenant</div>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">
+          <div class="pipeline-icon">🎨</div>
+          <div class="pipeline-label">2. CSS Vars</div>
+          <div class="pipeline-desc">Injected on &lt;html&gt;</div>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">
+          <div class="pipeline-icon">⚡</div>
+          <div class="pipeline-label">3. Components</div>
+          <div class="pipeline-desc">var() resolves via cascade</div>
+        </div>
+      </div>
+
       <div class="theming-demo">
-        <div class="theme-sample">
-          <div class="theme-sample-name">Corporate</div>
+        <div class="theme-sample" data-customer="default">
+          <div class="theme-sample-badge">BASE</div>
+          <div class="theme-sample-name">Corporate Base</div>
           <div class="theme-sample-colors">
             <div class="theme-sample-dot" style="background:#5e6ad2"></div>
             <div class="theme-sample-dot" style="background:#f7f8f8"></div>
             <div class="theme-sample-dot" style="background:#0f1011"></div>
-            <div class="theme-sample-dot" style="background:#191a1b"></div>
             <div class="theme-sample-dot" style="background:#10b981"></div>
           </div>
-          <div class="theme-sample-desc">Default · Dark · Professional blue accent</div>
+          <div class="theme-sample-desc">Professional indigo · Dark base · WCAG AA</div>
           <div class="theme-sample-tags">
-            <span class="theme-sample-tag">Indigo</span>
-            <span class="theme-sample-tag">Clean</span>
-            <span class="theme-sample-tag">WCAG AA</span>
+            <span class="theme-sample-tag">--accent: #5e6ad2</span>
+            <span class="theme-sample-tag">--bg-base: #0f1011</span>
           </div>
         </div>
-        <div class="theme-sample">
-          <div class="theme-sample-name">Midnight</div>
+        <div class="theme-sample" data-customer="acme-logistics">
+          <div class="theme-sample-badge test">TEST</div>
+          <div class="theme-sample-name">Acme Logistics</div>
           <div class="theme-sample-colors">
-            <div class="theme-sample-dot" style="background:#7850ff"></div>
-            <div class="theme-sample-dot" style="background:#eeeaff"></div>
-            <div class="theme-sample-dot" style="background:#0e0e15"></div>
-            <div class="theme-sample-dot" style="background:#14141e"></div>
-            <div class="theme-sample-dot" style="background:#34d399"></div>
+            <div class="theme-sample-dot" style="background:#ea580c"></div>
+            <div class="theme-sample-dot" style="background:#fef3e6"></div>
+            <div class="theme-sample-dot" style="background:#0f0a06"></div>
+            <div class="theme-sample-dot" style="background:#16a34a"></div>
           </div>
-          <div class="theme-sample-desc">Dark · Rich · Purple accent · Deep</div>
+          <div class="theme-sample-desc">Orange utilitarian · 4px radius · Grounded</div>
           <div class="theme-sample-tags">
-            <span class="theme-sample-tag">Purple</span>
-            <span class="theme-sample-tag">Rich</span>
-            <span class="theme-sample-tag">Deep black</span>
+            <span class="theme-sample-tag">--accent: #f97316</span>
+            <span class="theme-sample-tag">--r-md: 4px</span>
           </div>
         </div>
-        <div class="theme-sample">
-          <div class="theme-sample-name">Sunset</div>
+        <div class="theme-sample" data-customer="nordic-bank">
+          <div class="theme-sample-badge test">TEST</div>
+          <div class="theme-sample-name">Nordic Bank</div>
           <div class="theme-sample-colors">
-            <div class="theme-sample-dot" style="background:#f97316"></div>
-            <div class="theme-sample-dot" style="background:#f7ede4"></div>
-            <div class="theme-sample-dot" style="background:#150b08"></div>
-            <div class="theme-sample-dot" style="background:#1e100a"></div>
-            <div class="theme-sample-dot" style="background:#34d399"></div>
+            <div class="theme-sample-dot" style="background:#1e3a5f"></div>
+            <div class="theme-sample-dot" style="background:#e8edf5"></div>
+            <div class="theme-sample-dot" style="background:#080b15"></div>
+            <div class="theme-sample-dot" style="background:#059669"></div>
           </div>
-          <div class="theme-sample-desc">Warm · Orange · Earthy · Cozy</div>
+          <div class="theme-sample-desc">Navy conservative · 2px radius · Precise</div>
           <div class="theme-sample-tags">
-            <span class="theme-sample-tag">Orange</span>
-            <span class="theme-sample-tag">Warm</span>
-            <span class="theme-sample-tag">Earthy</span>
+            <span class="theme-sample-tag">--accent: #3b82f6</span>
+            <span class="theme-sample-tag">--r-md: 2px</span>
+          </div>
+        </div>
+        <div class="theme-sample" data-customer="vertex-health">
+          <div class="theme-sample-badge test">TEST</div>
+          <div class="theme-sample-name">Vertex Health</div>
+          <div class="theme-sample-colors">
+            <div class="theme-sample-dot" style="background:#0d9488"></div>
+            <div class="theme-sample-dot" style="background:#e0f5f0"></div>
+            <div class="theme-sample-dot" style="background:#080f0c"></div>
+            <div class="theme-sample-dot" style="background:#10b981"></div>
+          </div>
+          <div class="theme-sample-desc">Teal clean · 8px radius · Approachable</div>
+          <div class="theme-sample-tags">
+            <span class="theme-sample-tag">--accent: #14b8a6</span>
+            <span class="theme-sample-tag">--r-md: 8px</span>
           </div>
         </div>
       </div>
@@ -2064,22 +2166,40 @@
 </div>
 
 <script>
-  // ── Customer config loader ──
+// ── Customer config loader with smooth morphing ──
   document.getElementById('customer-select')?.addEventListener('change', function() {
     const key = this.value;
+    
+    function applyVars(vars, config) {
+      const root = document.documentElement;
+      // Enable smooth morphing
+      root.classList.add('theme-morphing');
+      // Batch-set CSS vars
+      Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v));
+      // Update placeholders
+      if (config) {
+        document.querySelector('.hero-badge').textContent = '\u2726 ' + config.companyName;
+        document.querySelector('.sidebar-logo .logo-icon').textContent = config.logoInitials;
+        document.querySelector('.topbar-breadcrumb span:last-child').textContent = config.companyName;
+        document.querySelectorAll('.theme-sample').forEach(c => c.classList.remove('active'));
+        document.querySelector('[data-customer="' + key + '"]')?.classList.add('active');
+      } else {
+        document.querySelector('.hero-badge').textContent = '\u2726 Default Environment';
+        document.querySelector('.sidebar-logo .logo-icon').textContent = '\u25C6';
+        document.querySelector('.topbar-breadcrumb span:last-child').textContent = 'UI Architecture Demo';
+        document.querySelectorAll('.theme-sample').forEach(c => c.classList.remove('active'));
+        document.querySelector('[data-customer="default"]')?.classList.add('active');
+      }
+      setTimeout(() => root.classList.remove('theme-morphing'), 450);
+    }
+    
     if (!key) {
-      // Reset to default: remove all inline CSS vars
-      document.documentElement.style.cssText = '';
-      document.documentElement.className = '';
-      document.querySelector('.hero-badge').textContent = '✦ Default Environment';
-      document.querySelector('.sidebar-logo .logo-icon').textContent = '◆';
-      document.querySelector('.topbar-breadcrumb span:last-child').textContent = 'UI Architecture Demo';
+      applyVars({});
       return;
     }
     fetch('/customer-configs/' + key + '.json')
       .then(r => r.json())
       .then(config => {
-        const root = document.documentElement;
         const t = config.theme;
         const vars = {
           '--bg-deep': config.backgroundColor,
@@ -2107,10 +2227,7 @@
           '--r-lg': Math.min(config.borderRadius + 2, 12) + 'px',
           '--r-xl': Math.min(config.borderRadius + 4, 16) + 'px',
         };
-        Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v));
-        document.querySelector('.hero-badge').textContent = '✦ ' + config.companyName;
-        document.querySelector('.sidebar-logo .logo-icon').textContent = config.logoInitials;
-        document.querySelector('.topbar-breadcrumb span:last-child').textContent = config.companyName;
+        applyVars(vars, config);
       })
       .catch(err => console.error('Config load failed:', err));
   });
